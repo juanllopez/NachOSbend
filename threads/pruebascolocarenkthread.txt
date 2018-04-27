@@ -1,0 +1,99 @@
+    public static void joinprueba(){	
+        KThread j1 = new KThread(new multi(3)).setName("Thread1");
+		KThread j2 = new KThread(new multi(5)).setName("Thread2");
+		j1.fork();
+		j1.join();
+		//elthread 2 tiene que esperar que el thread1 termine
+		j2.fork();*/
+    }
+
+
+    private static class multi implements Runnable {
+		private int res;
+		multi(int which) {
+			this.which = which;
+		}
+
+		public void run() {
+
+			for (int i=0; i<which; i++) {
+				System.out.println("*** mult iteration " + i + " resultado "
+						+ ((i+1)*which));
+				res = which*which;
+
+				currentThread.yield();
+			}
+			System.out.println("result " + res);
+		}
+
+		private int which;
+	}
+
+	public static void conditionTest()
+	{
+		/*
+		 * Tests condition2 by spawning a thread that goes to sleep and
+		 * is waken up by the main thread
+		 */
+		System.out.println("Condition TEST #1: Start");
+		final Lock lock = new Lock();
+		final Condition2 condition = new Condition2(lock);
+		KThread thread1 = new KThread(new Runnable(){
+			public void run(){
+				lock.acquire();
+				System.out.println("Thread is going to sleep");
+				condition.sleep();
+				System.out.println("Thread has been woken up");
+				lock.release();
+			}
+		});
+		KThread thread2 = new KThread(new Runnable(){
+			public void run(){
+				lock.acquire();
+				System.out.println("Thread is going to sleep");
+				condition.sleep();
+				System.out.println("Thread has been woken up");
+				lock.release();
+			}
+		});
+		KThread thread3 = new KThread(new Runnable(){
+			public void run(){
+				lock.acquire();
+				System.out.println("Thread is going to sleep");
+				condition.sleep();
+				System.out.println("Thread has been woken up");
+				lock.release();
+			}
+		});
+		thread1.fork();
+		thread2.fork();
+		thread3.fork();
+		System.out.println("Main: yielding to run the other thread");
+		KThread.yield();
+		System.out.println("Main: sending the wake signal then yeilding");
+		lock.acquire();
+		condition.wakeAll();
+		lock.release();
+		KThread.yield();
+		System.out.println("Condition TEST #1: End");
+	}
+
+	public static void alarmTest()
+	{
+		/*
+		 *  Picks a certain amount of ticks between 0 and 1 million and calls
+		 *  Alarm.waitUntil with this amount of ticks. Does this several times
+		 *  just to show that it works properly.
+		 */
+		long ticks;
+		Alarm test = new Alarm();
+		for (int i =0;i<5;i++)
+		{
+			ticks=(long)(Math.random()*1000000);
+			System.out.println("I'm about to wait for " + ticks + " ticks.");
+			test.waitUntil(ticks);
+			System.out.println(ticks + " ticks later, I'm done waiting!");
+		}
+	}
+
+
